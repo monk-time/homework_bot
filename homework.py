@@ -130,37 +130,21 @@ def main():
         try:
             api_answer = get_api_answer(timestamp)
             check_response(api_answer)
-        except (
-            NetworkError,
-            requests.HTTPError,
-            BadJSONFromAPIError,
-            TypeError,
-        ) as error:
-            log_error_and_report(bot, str(error), previous_message)
-            previous_message = str(error)
-            time.sleep(RETRY_PERIOD)
-            continue
-
-        timestamp = api_answer['current_date']
-        homeworks = api_answer['homeworks']
-
-        if not homeworks:
-            logging.debug('Нет новых обновлений статуса')
-            previous_message = None
-            time.sleep(RETRY_PERIOD)
-            continue
-
-        try:
+            timestamp = api_answer['current_date']
+            homeworks = api_answer['homeworks']
+            if not homeworks:
+                logging.debug('Нет новых обновлений статуса')
+                previous_message = None
+                time.sleep(RETRY_PERIOD)
+                continue
             status = parse_status(homeworks[0])
-        except BadJSONFromAPIError as error:
+            logging.info(f'Обнаружено новое обновление статуса: {status}')
+            send_message(bot, status)
+            previous_message = None
+        except Exception as error:
             log_error_and_report(bot, str(error), previous_message)
             previous_message = str(error)
-            time.sleep(RETRY_PERIOD)
-            continue
 
-        logging.info(f'Обнаружено новое обновление статуса: {status}')
-        send_message(bot, status)
-        previous_message = None
         time.sleep(RETRY_PERIOD)
 
 
