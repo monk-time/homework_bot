@@ -135,7 +135,6 @@ def main():
             if not homeworks:
                 logging.debug('Нет новых обновлений статуса')
                 previous_message = None
-                time.sleep(RETRY_PERIOD)
                 continue
             status = parse_status(homeworks[0])
             logging.info(f'Обнаружено новое обновление статуса: {status}')
@@ -144,8 +143,8 @@ def main():
         except Exception as error:
             log_error_and_report(bot, str(error), previous_message)
             previous_message = str(error)
-
-        time.sleep(RETRY_PERIOD)
+        finally:
+            time.sleep(RETRY_PERIOD)
 
 
 if __name__ == '__main__':
