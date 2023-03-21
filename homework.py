@@ -97,7 +97,10 @@ def check_response(response: dict) -> None:
     if 'homeworks' not in response:
         raise BadJSONFromAPIError("В ответе API нет ключа 'homeworks'")
     if not isinstance(response['homeworks'], list):
-        raise TypeError("В ответе API под ключом 'homeworks' лежит не список")
+        raise TypeError(
+            "В ответе API под ключом 'homeworks' лежит не список, "
+            f"а {type(response['homeworks'])}"
+        )
     logging.debug('Ответ API корректен')
 
 
