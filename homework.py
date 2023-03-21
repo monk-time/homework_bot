@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import time
 from http import HTTPStatus
 from json import JSONDecodeError
@@ -28,13 +29,16 @@ HOMEWORK_VERDICTS = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.',
 }
 
-logging.basicConfig(
-    format=(
-        '%(asctime)s [%(levelname)s] %(message)s - '
-        '%(name)s:%(funcName)s:%(lineno)d'
-    ),
-    level=logging.DEBUG,
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+# По техзаданию логирование должно вестись в терминал, а не в файл
+handler = logging.StreamHandler(stream=sys.stdout)
+formatter = logging.Formatter(
+    '%(asctime)s [%(levelname)s] %(message)s '
+    '(%(name)s:%(funcName)s:%(lineno)d)'
 )
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 def check_tokens():
@@ -44,9 +48,9 @@ def check_tokens():
     if None in tokens:
         first_missing_token = token_names[tokens.index(None)]
         message = f'В окружении не найден токен {first_missing_token}'
-        logging.critical(message)
+        logger.critical(message)
         raise MissingTokenError(message)
-    logging.info('Все токены успешно найдены в переменных окружения')
+    logger.info('Все токены успешно найдены в переменных окружения')
 
 
 def send_message(bot, message: str) -> None:
@@ -54,9 +58,9 @@ def send_message(bot, message: str) -> None:
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
     except Exception as error:
-        logging.error(f'Ошибка отправки сообщения боту в Telegram: {error}')
+        logger.error(f'Ошибка отправки сообщения боту в Telegram: {error}')
         return
-    logging.debug('Успешно отправлено сообщение боту в Telegram')
+    logger.debug('Успешно отправлено сообщение боту в Telegram')
 
 
 def log_error_and_report(bot, message: str, previous_message: str):
@@ -64,7 +68,7 @@ def log_error_and_report(bot, message: str, previous_message: str):
 
     Не отправлять повторно сообщения об одинаковых ошибках в Telegram.
     """
-    logging.error(message)
+    logger.error(message)
     if message != previous_message:
         send_message(bot, message)
 
@@ -87,7 +91,7 @@ def get_api_answer(timestamp: int) -> dict:
         api_answer = homework_statuses.json()
     except JSONDecodeError as error:
         raise BadJSONFromAPIError(f'Сервер вернул невалидный JSON: {error}')
-    logging.debug('Успешно получен ответ от API Яндекс.Практикума')
+    logger.debug('Успешно получен ответ от API Яндекс.Практикума')
     return api_answer
 
 
@@ -104,7 +108,7 @@ def check_response(response: dict) -> None:
             "В ответе API под ключом 'homeworks' лежит не список, "
             f"а {type(response['homeworks'])}"
         )
-    logging.debug('Ответ API корректен')
+    logger.debug('Ответ API корректен')
 
 
 def parse_status(homework: dict) -> str:
@@ -139,11 +143,11 @@ def main():
             timestamp = api_answer['current_date']
             homeworks = api_answer['homeworks']
             if not homeworks:
-                logging.debug('Нет новых обновлений статуса')
+                logger.debug('Нет новых обновлений статуса')
                 previous_message = None
                 continue
             status = parse_status(homeworks[0])
-            logging.info(f'Обнаружено новое обновление статуса: {status}')
+            logger.info(f'Обнаружено новое обновление статуса: {status}')
             send_message(bot, status)
             previous_message = None
         except Exception as error:
