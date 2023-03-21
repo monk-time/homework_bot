@@ -29,7 +29,10 @@ HOMEWORK_VERDICTS = {
 }
 
 logging.basicConfig(
-    format='%(asctime)s [%(levelname)s] (%(name)s) %(message)s',
+    format=(
+        '%(asctime)s [%(levelname)s] %(message)s - '
+        '%(name)s:%(funcName)s:%(lineno)d'
+    ),
     level=logging.DEBUG,
 )
 
