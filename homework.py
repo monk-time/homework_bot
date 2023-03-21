@@ -71,7 +71,7 @@ def get_api_answer(timestamp: int) -> dict:
     try:
         homework_statuses = requests.get(
             ENDPOINT,
-            headers={'Authorization': f'OAuth {PRACTICUM_TOKEN}'},
+            headers=HEADERS,
             params={'from_date': timestamp},
         )
     except Exception as error:
