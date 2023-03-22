@@ -98,7 +98,7 @@ def get_api_answer(timestamp: int) -> dict:
 def check_response(response: dict) -> None:
     """Проверить ответ API на соответствие документации."""
     if not isinstance(response, dict):
-        raise TypeError('Ответ API является списком вместо словаря')
+        raise TypeError('Ответ API должен быть словарем')
     if 'current_date' not in response:
         raise BadJSONFromAPIError("В ответе API нет ключа 'current_date'")
     if 'homeworks' not in response:
