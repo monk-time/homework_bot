@@ -43,11 +43,10 @@ logger.addHandler(handler)
 
 def check_tokens():
     """Проверить доступность переменных окружения, необходимых для работы."""
-    tokens = (PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID)
     token_names = ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID')
-    if None in tokens:
-        first_missing_token = token_names[tokens.index(None)]
-        message = f'В окружении не найден токен {first_missing_token}'
+    missing_tokens = [name for name in token_names if not globals().get(name)]
+    if missing_tokens:
+        message = f'В окружении не найдены токены {", ".join(missing_tokens)}'
         logger.critical(message)
         raise MissingTokenError(message)
     logger.info('Все токены успешно найдены в переменных окружения')
