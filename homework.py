@@ -34,8 +34,8 @@ logger.setLevel(logging.DEBUG)
 # По техзаданию логирование должно вестись в терминал, а не в файл
 handler = logging.StreamHandler(stream=sys.stdout)
 formatter = logging.Formatter(
-    '%(asctime)s [%(levelname)s] %(message)s '
-    '(%(name)s:%(funcName)s:%(lineno)d)'
+    '%(asctime)s [%(levelname)s] [%(name)s:%(funcName)s:%(lineno)d] '
+    '%(message)s'
 )
 handler.setFormatter(formatter)
 logger.addHandler(handler)
