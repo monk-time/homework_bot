@@ -137,10 +137,10 @@ def main():
 
     while True:
         try:
-            api_answer = get_api_answer(timestamp)
-            check_response(api_answer)
-            timestamp = api_answer['current_date']
-            homeworks = api_answer['homeworks']
+            response = get_api_answer(timestamp)
+            check_response(response)
+            timestamp = response['current_date']
+            homeworks = response['homeworks']
             if not homeworks:
                 logger.debug('Нет новых обновлений статуса')
                 previous_message = None

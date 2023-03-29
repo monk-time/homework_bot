@@ -453,7 +453,7 @@ class TestHomework:
         homework_module.PRACTICUM_TOKEN = 'sometoken'
         homework_module.TELEGRAM_TOKEN = '1234:abcdefg'
         homework_module.TELEGRAM_CHAT_ID = '12345'
-        
+
         func_name = 'send_message'
         utils.check_function(
             homework_module,
