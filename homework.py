@@ -139,15 +139,14 @@ def main():
         try:
             response = get_api_answer(timestamp)
             check_response(response)
-            timestamp = response['current_date']
             homeworks = response['homeworks']
-            if not homeworks:
+            if homeworks:
+                status = parse_status(homeworks[0])
+                logger.info(f'Обнаружено новое обновление статуса: {status}')
+                send_message(bot, status)
+            else:
                 logger.debug('Нет новых обновлений статуса')
-                previous_message = None
-                continue
-            status = parse_status(homeworks[0])
-            logger.info(f'Обнаружено новое обновление статуса: {status}')
-            send_message(bot, status)
+            timestamp = response['current_date']
             previous_message = None
         except Exception as error:
             log_error_and_report(bot, str(error), previous_message)
