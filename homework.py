@@ -62,16 +62,6 @@ def send_message(bot, message: str) -> None:
     logger.debug('Успешно отправлено сообщение боту в Telegram')
 
 
-def log_error_and_report(bot, message: str, previous_message: str):
-    """Логировать и пересылать в Telegram события уровня ERROR.
-
-    Не отправлять повторно сообщения об одинаковых ошибках в Telegram.
-    """
-    logger.error(message)
-    if message != previous_message:
-        send_message(bot, message)
-
-
 def get_api_answer(timestamp: int) -> dict:
     """Сделать запрос к API Яндекс.Практикума и получить ответ о статусе."""
     try:
@@ -149,8 +139,11 @@ def main():
             timestamp = response['current_date']
             previous_message = None
         except Exception as error:
-            log_error_and_report(bot, str(error), previous_message)
-            previous_message = str(error)
+            message = str(error)
+            logger.error(message)
+            if message != previous_message:
+                send_message(bot, message)
+            previous_message = message
         finally:
             time.sleep(RETRY_PERIOD)
 
