@@ -4,7 +4,7 @@ Telegram-бот для проверки статуса домашней рабо
 При обновлении статуса последней работы бот присылает уведомление в указанный чат. Логирование ведётся в stdout.
 
 ### Используемые технологии
-- Python 3.9
+- Python 3.12
 - python-telegram-bot
 - python-dotenv
 - requests
@@ -17,7 +17,7 @@ Telegram-бот для проверки статуса домашней рабо
 
 2. Подготовить окружение:
     ```bash
-    py -m 3.9 venv venv
+    py -m 3.12 venv venv
     source venv/Scripts/activate
     pip install -r requirements.txt
     ```
