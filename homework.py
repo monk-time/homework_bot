@@ -1,3 +1,5 @@
+# ruff: noqa: BLE001
+
 import logging
 import os
 import sys
@@ -46,7 +48,7 @@ def check_tokens():
     token_names = ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID')
     missing_tokens = [name for name in token_names if not globals().get(name)]
     if missing_tokens:
-        message = f'В окружении не найдены токены {", ".join(missing_tokens)}'
+        message = f'В окружении не найдены токены {', '.join(missing_tokens)}'
         logger.critical(message)
         raise MissingTokenError(message)
     logger.info('Все токены успешно найдены в переменных окружения')
@@ -71,15 +73,18 @@ def get_api_answer(timestamp: int) -> dict:
             params={'from_date': timestamp},
         )
     except Exception as error:
-        raise NetworkError(f'Сбой при запросе к Яндекс.Практикуму: {error}')
+        msg = f'Сбой при запросе к Яндекс.Практикуму: {error}'
+        raise NetworkError(msg)
     if homework_statuses.status_code != HTTPStatus.OK:
-        raise requests.HTTPError(
+        msg = (
             f'API Яндекс.Практикума вернул код {homework_statuses.status_code}'
         )
+        raise requests.HTTPError(msg)
     try:
         api_answer = homework_statuses.json()
     except JSONDecodeError as error:
-        raise BadJSONFromAPIError(f'Сервер вернул невалидный JSON: {error}')
+        msg = f'Сервер вернул невалидный JSON: {error}'
+        raise BadJSONFromAPIError(msg)
     logger.debug('Успешно получен ответ от API Яндекс.Практикума')
     return api_answer
 
@@ -87,16 +92,18 @@ def get_api_answer(timestamp: int) -> dict:
 def check_response(response: dict) -> None:
     """Проверить ответ API на соответствие документации."""
     if not isinstance(response, dict):
-        raise TypeError(f'Ответ API является не словарем, а {type(response)}')
-    if 'current_date' not in response:
-        raise BadJSONFromAPIError("В ответе API нет ключа 'current_date'")
-    if 'homeworks' not in response:
-        raise BadJSONFromAPIError("В ответе API нет ключа 'homeworks'")
+        msg = f'Ответ API является не словарем, а {type(response)}'
+        raise TypeError(msg)
+    for key in ('current_date', 'homeworks'):
+        if key not in response:
+            msg = f"В ответе API нет ключа '{key}'"
+            raise BadJSONFromAPIError(msg)
     if not isinstance(response['homeworks'], list):
-        raise TypeError(
+        msg = (
             "В ответе API под ключом 'homeworks' лежит не список, "
             f"а {type(response['homeworks'])}"
         )
+        raise TypeError(msg)
     logger.debug('Ответ API корректен')
 
 
@@ -106,11 +113,11 @@ def parse_status(homework: dict) -> str:
         homework_name = homework['homework_name']
         status = homework['status']
     except KeyError as error:
-        raise BadJSONFromAPIError(f'В ответе API нет ключа {error}')
+        msg = f'В ответе API нет ключа {error}'
+        raise BadJSONFromAPIError(msg)
     if status not in HOMEWORK_VERDICTS:
-        raise BadJSONFromAPIError(
-            f'Неожиданный статус домашней работы: {status}'
-        )
+        msg = f'Неожиданный статус домашней работы: {status}'
+        raise BadJSONFromAPIError(msg)
     return (
         f'Изменился статус проверки работы "{homework_name}". '
         f'{HOMEWORK_VERDICTS[status]}'

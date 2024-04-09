@@ -1,6 +1,6 @@
 import logging
-import signal
 import re
+import signal
 from collections import namedtuple
 from contextlib import contextmanager
 from functools import wraps
@@ -23,9 +23,7 @@ def check_function(scope: ModuleType, func_name: str, params_qty: int = 0):
 
     func = getattr(scope, func_name)
 
-    assert callable(func), (
-        f'`{func_name}` должна быть функцией'
-    )
+    assert callable(func), f'`{func_name}` должна быть функцией'
 
     sig = signature(func)
     assert len(sig.parameters) == params_qty, (
@@ -39,9 +37,9 @@ def check_docstring(scope: ModuleType, func_name: str):
         f'Не найдена функция `{func_name}`. '
         'Не удаляйте и не переименовывайте её.'
     )
-    assert getattr(scope, func_name).__doc__, (
-        f'Убедитесь, что в функции `{func_name}` есть docstring.'
-    )
+    assert getattr(
+        scope, func_name
+    ).__doc__, f'Убедитесь, что в функции `{func_name}` есть docstring.'
 
 
 def check_default_var_exists(scope: ModuleType, var_name: str) -> None:
@@ -57,21 +55,19 @@ def check_default_var_exists(scope: ModuleType, var_name: str) -> None:
         'Не удаляйте и не переименовывайте ее.'
     )
     var = getattr(scope, var_name)
-    assert not callable(var), (
-        f'`{var_name}` должна быть переменной, а не функцией.'
-    )
+    assert not callable(
+        var
+    ), f'`{var_name}` должна быть переменной, а не функцией.'
 
 
 @contextmanager
 def check_logging(caplog, level, message):
-    """
-    Check if a log message of the specified level appears during code
-    execution in the context manager.
-    """
+    """Check if a log message of the specified level appears during code execution in the context manager."""
     with caplog.at_level(level):
         yield
         log_record = [
-            record for record in caplog.records
+            record
+            for record in caplog.records
             if record.levelname == logging.getLevelName(level)
         ]
         assert len(log_record) > 0, message
@@ -83,15 +79,21 @@ InvalidResponse = namedtuple('InvalidResponse', ('data', 'defected_key'))
 class MockResponseGET:
     CALLED_LOG_MSG = 'Request is sent'
 
-    def __init__(self, *args, random_timestamp=None,
-                 http_status=HTTPStatus.OK, data=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        random_timestamp=None,
+        http_status=HTTPStatus.OK,
+        data=None,
+        **kwargs,
+    ):
         self.random_timestamp = random_timestamp
         self.status_code = http_status
         self.reason = ''
         self.text = ''
         default_data = {
             'homeworks': [],
-            'current_date': self.random_timestamp
+            'current_date': self.random_timestamp,
         }
         self.data = default_data if data is None else data
         logging.warn(MockResponseGET.CALLED_LOG_MSG)
@@ -101,7 +103,8 @@ class MockResponseGET:
 
     def raise_for_status(self):
         if self.status_code >= 400:
-            raise ValueError('Server or client error.')
+            msg = 'Server or client error.'
+            raise ValueError(msg)
 
 
 class MockTelegramBot:
@@ -114,7 +117,7 @@ class MockTelegramBot:
         self.text = text
 
 
-class BreakInfiniteLoop(Exception):
+class BreakInfiniteLoopError(Exception):
     pass
 
 
@@ -134,14 +137,12 @@ class Timeout:
         signal.signal(signal.SIGALRM, self.handle_timeout)
         signal.alarm(self.seconds)
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, type, value, traceback):  # noqa: A002
         signal.alarm(0)
 
 
 def with_timeout(f):
-    """Make function raise TimeoutError after `timeout` seconds.
-    This is a decorator.
-    """
+    """Decorate a function to raise TimeoutError after `timeout` seconds."""
     timeout = 1
 
     @wraps(f)
@@ -153,15 +154,16 @@ def with_timeout(f):
                     f()
             except TestTimeoutError:
                 pass
-        except BreakInfiniteLoop:
+        except BreakInfiniteLoopError:
             # intercept higher up in the call hierarchy
             raise
         else:
             # homework_module.main() timed out
-            raise AssertionError(
+            msg = (
                 'Убедитесь, что внутри цикла `while True` функции `main` при '
                 'любом сценарии исполнения кода выполняется функция '
                 '`time.sleep()`.'
             )
+            raise AssertionError(msg)
 
     return inner

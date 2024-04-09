@@ -128,6 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Ruff
+.ruff_cache/
+
 # Папки, создаваемые средой разработки
 .idea
 .DS_Store
@@ -142,11 +145,3 @@ dmypy.json
 
 # Local History for Visual Studio Code
 .history/
-
-.mypy_cache
-
-# папки со статикой и медиа
-static/
-posts/static/
-media/
-
