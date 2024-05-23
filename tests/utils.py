@@ -1,12 +1,12 @@
 import logging
 import re
 import signal
-from collections import namedtuple
 from contextlib import contextmanager
 from functools import wraps
 from http import HTTPStatus
 from inspect import signature
 from types import ModuleType
+from typing import NamedTuple
 
 
 def get_clean_source_code(raw_src: str) -> str:
@@ -62,7 +62,7 @@ def check_default_var_exists(scope: ModuleType, var_name: str) -> None:
 
 @contextmanager
 def check_logging(caplog, level, message):
-    """Check if a log message of the specified level appears during code execution in the context manager."""
+    """Check if a log message appears during code execution."""
     with caplog.at_level(level):
         yield
         log_record = [
@@ -73,7 +73,9 @@ def check_logging(caplog, level, message):
         assert len(log_record) > 0, message
 
 
-InvalidResponse = namedtuple('InvalidResponse', ('data', 'defected_key'))
+class InvalidResponse(NamedTuple):
+    data: list | dict
+    defected_key: str | None
 
 
 class MockResponseGET:
@@ -96,7 +98,7 @@ class MockResponseGET:
             'current_date': self.random_timestamp,
         }
         self.data = default_data if data is None else data
-        logging.warn(MockResponseGET.CALLED_LOG_MSG)
+        logging.warning(MockResponseGET.CALLED_LOG_MSG)
 
     def json(self):
         return self.data
@@ -154,7 +156,7 @@ def with_timeout(f):
                     f()
             except TestTimeoutError:
                 pass
-        except BreakInfiniteLoopError:
+        except BreakInfiniteLoopError:  # noqa: TRY302
             # intercept higher up in the call hierarchy
             raise
         else:

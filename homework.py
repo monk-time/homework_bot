@@ -58,8 +58,8 @@ def send_message(bot, message: str) -> None:
     """Отправить сообщение в Telegram чат TELEGRAM_CHAT_ID."""
     try:
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-    except Exception as error:
-        logger.error(f'Ошибка отправки сообщения боту в Telegram: {error}')
+    except Exception:
+        logger.exception('Ошибка отправки сообщения боту в Telegram')
         return
     logger.debug('Успешно отправлено сообщение боту в Telegram')
 
@@ -74,7 +74,7 @@ def get_api_answer(timestamp: int) -> dict:
         )
     except Exception as error:
         msg = f'Сбой при запросе к Яндекс.Практикуму: {error}'
-        raise NetworkError(msg)
+        raise NetworkError(msg) from error
     if homework_statuses.status_code != HTTPStatus.OK:
         msg = (
             f'API Яндекс.Практикума вернул код {homework_statuses.status_code}'
@@ -84,7 +84,7 @@ def get_api_answer(timestamp: int) -> dict:
         api_answer = homework_statuses.json()
     except JSONDecodeError as error:
         msg = f'Сервер вернул невалидный JSON: {error}'
-        raise BadJSONFromAPIError(msg)
+        raise BadJSONFromAPIError(msg) from error
     logger.debug('Успешно получен ответ от API Яндекс.Практикума')
     return api_answer
 
@@ -114,7 +114,7 @@ def parse_status(homework: dict) -> str:
         status = homework['status']
     except KeyError as error:
         msg = f'В ответе API нет ключа {error}'
-        raise BadJSONFromAPIError(msg)
+        raise BadJSONFromAPIError(msg) from error
     if status not in HOMEWORK_VERDICTS:
         msg = f'Неожиданный статус домашней работы: {status}'
         raise BadJSONFromAPIError(msg)
@@ -147,7 +147,7 @@ def main():
             previous_message = None
         except Exception as error:
             message = str(error)
-            logger.error(message)
+            logger.exception(message)
             if message != previous_message:
                 send_message(bot, message)
             previous_message = message

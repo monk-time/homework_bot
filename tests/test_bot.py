@@ -8,7 +8,8 @@ from http import HTTPStatus
 import pytest
 import requests
 import telegram
-import utils
+
+from tests import utils
 
 old_sleep = time.sleep
 
@@ -205,9 +206,9 @@ class TestHomework:  # noqa: PLR0904
                 assert from_date == int(
                     current_timestamp
                 ), 'Проверьте, что в параметре `from_date` передан timestamp.'
-            except ValueError:
+            except ValueError as e:
                 msg = 'Проверьте, что в параметре `from_date` передано число.'
-                raise AssertionError(msg)
+                raise AssertionError(msg) from e
 
         monkeypatch.setattr(requests, 'get', check_request_call)
         try:
@@ -366,7 +367,7 @@ class TestHomework:  # noqa: PLR0904
                         'недокументированный статус домашней работы либо '
                         'домашку без статуса.'
                     )
-                    raise AssertionError(msg)
+                    raise AssertionError(msg) from e
             except Exception:
                 pass
             else:
@@ -396,7 +397,7 @@ class TestHomework:  # noqa: PLR0904
                     'исключение с понятным текстом ошибки, когда в ответе '
                     'API домашки нет ключа `homework_name`.'
                 )
-                raise AssertionError(msg)
+                raise AssertionError(msg) from e
         except Exception:
             pass
         else:
@@ -480,8 +481,8 @@ class TestHomework:  # noqa: PLR0904
                 homework_module.check_response(response.data)
             except TypeError:
                 pass
-            except Exception:
-                raise AssertionError(assert_message)
+            except Exception as e:
+                raise AssertionError(assert_message) from e
             else:
                 raise AssertionError(assert_message)
 
@@ -561,7 +562,7 @@ class TestHomework:  # noqa: PLR0904
         mock_bot=True,
         response_data=None,
     ):
-        """Mock all functions inside main() which need environment vars to work correctly."""
+        """Mock all functions inside main() which need env vars."""
         monkeypatch.setattr(homework_module, 'PRACTICUM_TOKEN', 'sometoken')
         monkeypatch.setattr(homework_module, 'TELEGRAM_TOKEN', '1234:abcdefg')
         monkeypatch.setattr(homework_module, 'TELEGRAM_CHAT_ID', '12345')
@@ -658,12 +659,12 @@ class TestHomework:  # noqa: PLR0904
         ):
             try:
                 homework_module.main()
-            except utils.BreakInfiniteLoopError:
+            except utils.BreakInfiniteLoopError as e:
                 msg = (
                     'Убедитесь, что при запуске бота без переменных окружения '
                     'программа принудительно останавливается.'
                 )
-                raise AssertionError(msg)
+                raise AssertionError(msg) from e
             except (Exception, SystemExit):
                 pass
 
@@ -729,7 +730,7 @@ class TestHomework:  # noqa: PLR0904
         def mock_check_response(response=None):
             if response != expected_data:
                 raise SystemExit(no_response_assert_msg)
-            logging.warn(log_msg)
+            logging.warning(log_msg)
 
         monkeypatch.setattr(
             homework_module,
@@ -739,8 +740,8 @@ class TestHomework:  # noqa: PLR0904
         with caplog.at_level(logging.WARNING):
             try:
                 homework_module.main()
-            except SystemExit:
-                raise AssertionError(no_response_assert_msg)
+            except SystemExit as e:
+                raise AssertionError(no_response_assert_msg) from e
             except utils.BreakInfiniteLoopError:
                 log_records = [
                     record
@@ -774,7 +775,7 @@ class TestHomework:  # noqa: PLR0904
         hw_status = data_with_new_hw_status['homeworks'][0]['status']
 
         def mock_send_message(bot, message=''):  # noqa: ARG001
-            logging.warn(message)
+            logging.warning(message)
 
         monkeypatch.setattr(
             homework_module,
