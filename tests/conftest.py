@@ -9,13 +9,9 @@ root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-root_dir_content = os.listdir(BASE_DIR)
 HOMEWORK_FILENAME = 'homework.py'
 # проверяем, что в корне репозитория лежит файл с домашкой
-if (
-    HOMEWORK_FILENAME not in root_dir_content
-    or (BASE_DIR / HOMEWORK_FILENAME).is_dir()
-):
+if not (BASE_DIR / HOMEWORK_FILENAME).is_file():
     pytest.fail(
         f'В директории `{BASE_DIR}` не найден файл '
         f'с домашней работой `{HOMEWORK_FILENAME}`. '

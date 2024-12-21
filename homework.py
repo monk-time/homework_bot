@@ -48,7 +48,7 @@ def check_tokens():
     token_names = ('PRACTICUM_TOKEN', 'TELEGRAM_TOKEN', 'TELEGRAM_CHAT_ID')
     missing_tokens = [name for name in token_names if not globals().get(name)]
     if missing_tokens:
-        message = f'В окружении не найдены токены {', '.join(missing_tokens)}'
+        message = f'В окружении не найдены токены {", ".join(missing_tokens)}'
         logger.critical(message)
         raise MissingTokenError(message)
     logger.info('Все токены успешно найдены в переменных окружения')
@@ -101,7 +101,7 @@ def check_response(response: dict) -> None:
     if not isinstance(response['homeworks'], list):
         msg = (
             "В ответе API под ключом 'homeworks' лежит не список, "
-            f"а {type(response['homeworks'])}"
+            f'а {type(response["homeworks"])}'
         )
         raise TypeError(msg)
     logger.debug('Ответ API корректен')

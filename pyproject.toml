@@ -1,3 +1,22 @@
+[project]
+name = "homework-bot"
+version = "0.1.0"
+description = "Telegram-бот для проверки статуса домашней работы на сервисе Практикум.Домашка"
+readme = "README.md"
+requires-python = "~=3.12"
+dependencies = [
+    "python-dotenv>=1.0.1",
+    "python-telegram-bot==13.11",
+    "requests>=2.32.3",
+    "urllib3==1.26.20",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-timeout>=2.3.1",
+]
+
 [tool.pytest.ini_options]
 addopts = '-vv -p no:cacheprovider -p no:warnings --show-capture=no'
 testpaths = ['tests/']
@@ -9,6 +28,9 @@ target-version = "py312"
 line-length = 79
 preview = true
 output-format = "concise" # preview mode switches this to full
+
+[tool.ruff.format]
+quote-style = "single"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -28,6 +50,9 @@ ignore = [
     "PLR2004", # magic-value-comparison      (demands too many constants)
     "TD003",   # missing-todo-link           (too cumbersome)
     "G004",    # logging-f-string            (pointless micro-optimization in most cases)
+    "DOC201",  # docstring-missing-returns   (excessive documentation)
+    "DOC402",  # docstring-missing-yields    (excessive documentation)
+    "DOC501",  # docstring-missing-exception (excessive documentation)
 ]
 allowed-confusables = [
     "а", "б", "в", "г", "е", "з", "и", "к", "м", "н", "о", "р", "с", "у", "ф", "х",
@@ -52,6 +77,3 @@ convention = "pep257"
 fixture-parentheses = false
 parametrize-names-type = "csv"
 parametrize-values-type = "tuple"
-
-[tool.ruff.format]
-quote-style = "single"

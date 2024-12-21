@@ -12,6 +12,7 @@ import telegram
 from tests import utils
 
 old_sleep = time.sleep
+logger = logging.getLogger(__name__)
 
 
 def create_mock_response_get_with_custom_status_and_data(
@@ -131,24 +132,21 @@ class TestHomework:  # noqa: PLR0904
             f'быть равно `{self.RETRY_PERIOD}`.'
         )
         student_verdicts = homework_module.HOMEWORK_VERDICTS
-        assert (
-            student_verdicts == self.HOMEWORK_VERDICTS
-        ), 'Не изменяйте значение переменной `HOMEWORK_VERDICTS`.'
+        assert student_verdicts == self.HOMEWORK_VERDICTS, (
+            'Не изменяйте значение переменной `HOMEWORK_VERDICTS`.'
+        )
 
     def test_bot_init_not_global(self, homework_module):
         for var in homework_module.__dict__:
             assert not isinstance(
                 getattr(homework_module, var),
                 telegram.Bot,
-            ), (
-                'Убедитесь, что бот инициализируется только в функции '
-                '`main()`.'
-            )
+            ), 'Убедитесь, что бот инициализируется только в функции `main()`.'
 
     def test_logger(self, homework_module):
-        assert hasattr(
-            homework_module, 'logging'
-        ), 'Убедитесь, что логирование бота настроено.'
+        assert hasattr(homework_module, 'logging'), (
+            'Убедитесь, что логирование бота настроено.'
+        )
         logging_config_pattern = re.compile(r'(logging\.basicConfig ?\()')
         hw_source = utils.get_clean_source_code(
             inspect.getsource(homework_module)
@@ -180,12 +178,12 @@ class TestHomework:  # noqa: PLR0904
             expected_url = (
                 'https://practicum.yandex.ru/api/user_api/homework_statuses'
             )
-            assert url.startswith(
-                expected_url
-            ), 'Проверьте адрес, на который отправляются запросы.'
-            assert (
-                'headers' in kwargs
-            ), 'Проверьте, что в запрос к API передан заголовок.'
+            assert url.startswith(expected_url), (
+                'Проверьте адрес, на который отправляются запросы.'
+            )
+            assert 'headers' in kwargs, (
+                'Проверьте, что в запрос к API передан заголовок.'
+            )
             assert 'Authorization' in kwargs['headers'], (
                 'Проверьте, что в заголовках запроса передано поле '
                 '`Authorization`.'
@@ -194,18 +192,18 @@ class TestHomework:  # noqa: PLR0904
                 'Проверьте, что заголовок `Authorization` '
                 'начинается с `OAuth`.'
             )
-            assert (
-                'params' in kwargs
-            ), 'Проверьте, что в запросе переданы параметры `params`.'
+            assert 'params' in kwargs, (
+                'Проверьте, что в запросе переданы параметры `params`.'
+            )
             assert 'from_date' in kwargs['params'], (
                 'Проверьте, что в параметрах к запросу передан параметр '
                 '`from_date`.'
             )
             try:
                 from_date = int(kwargs['params']['from_date'])
-                assert from_date == int(
-                    current_timestamp
-                ), 'Проверьте, что в параметре `from_date` передан timestamp.'
+                assert from_date == int(current_timestamp), (
+                    'Проверьте, что в параметре `from_date` передан timestamp.'
+                )
             except ValueError as e:
                 msg = 'Проверьте, что в параметре `from_date` передано число.'
                 raise AssertionError(msg) from e
@@ -243,9 +241,9 @@ class TestHomework:  # noqa: PLR0904
         monkeypatch.setattr(requests, 'get', mock_response_get)
 
         result = homework_module.get_api_answer(current_timestamp)
-        assert isinstance(
-            result, dict
-        ), f'Проверьте, что функция `{func_name}` возвращает словарь.'
+        assert isinstance(result, dict), (
+            f'Проверьте, что функция `{func_name}` возвращает словарь.'
+        )
 
     @pytest.mark.parametrize('response', NOT_OK_RESPONSES.values())
     def test_get_not_200_status_response(
@@ -323,12 +321,12 @@ class TestHomework:  # noqa: PLR0904
             test_data['status'] = status_key
 
             result = homework_module.parse_status(test_data)
-            assert isinstance(
-                result, str
-            ), f'Проверьте, что функция `{func_name}` возвращает строку.'
+            assert isinstance(result, str), (
+                f'Проверьте, что функция `{func_name}` возвращает строку.'
+            )
             assert result.startswith(
                 'Изменился статус проверки работы '
-                f'"{test_data['homework_name']}"'
+                f'"{test_data["homework_name"]}"'
             ), (
                 f'Проверьте, что в ответе функции `{func_name}` содержится '
                 'название домашней работы.'
@@ -539,9 +537,9 @@ class TestHomework:  # noqa: PLR0904
             r'(\w* ?= ?)((telegram\.)?Bot\( *[\w=_\-\'\"]* *\))'
         )
         search_result = re.search(bot_init_pattern, main_source)
-        assert (
-            search_result
-        ), 'Убедитесь, что бот инициализируется только в функции `main()`.'
+        assert search_result, (
+            'Убедитесь, что бот инициализируется только в функции `main()`.'
+        )
 
         bot_init_with_token_pattern = re.compile(
             r'Bot\( *token *= *TELEGRAM_TOKEN *\)'
@@ -582,9 +580,9 @@ class TestHomework:  # noqa: PLR0904
             r'(\# *)?(time\.sleep\( *[\w\d=_\-\'\"]* *\))'
         )
         search_result = re.search(time_sleep_pattern, main_source)
-        assert (
-            search_result
-        ), 'Убедитесь, что в `main()` применена функция `time.sleep()`.'
+        assert search_result, (
+            'Убедитесь, что в `main()` применена функция `time.sleep()`.'
+        )
 
         def sleep_to_interrupt(secs):
             caller = inspect.stack()[1].function
@@ -730,7 +728,7 @@ class TestHomework:  # noqa: PLR0904
         def mock_check_response(response=None):
             if response != expected_data:
                 raise SystemExit(no_response_assert_msg)
-            logging.warning(log_msg)
+            logger.warning(log_msg)
 
         monkeypatch.setattr(
             homework_module,
@@ -775,7 +773,7 @@ class TestHomework:  # noqa: PLR0904
         hw_status = data_with_new_hw_status['homeworks'][0]['status']
 
         def mock_send_message(bot, message=''):  # noqa: ARG001
-            logging.warning(message)
+            logger.warning(message)
 
         monkeypatch.setattr(
             homework_module,

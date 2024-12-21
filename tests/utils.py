@@ -8,6 +8,8 @@ from inspect import signature
 from types import ModuleType
 from typing import NamedTuple
 
+logger = logging.getLogger(__name__)
+
 
 def get_clean_source_code(raw_src: str) -> str:
     comment_pattern = re.compile(r'\s*#[^\n]*')
@@ -37,9 +39,9 @@ def check_docstring(scope: ModuleType, func_name: str):
         f'Не найдена функция `{func_name}`. '
         'Не удаляйте и не переименовывайте её.'
     )
-    assert getattr(
-        scope, func_name
-    ).__doc__, f'Убедитесь, что в функции `{func_name}` есть docstring.'
+    assert getattr(scope, func_name).__doc__, (
+        f'Убедитесь, что в функции `{func_name}` есть docstring.'
+    )
 
 
 def check_default_var_exists(scope: ModuleType, var_name: str) -> None:
@@ -55,9 +57,9 @@ def check_default_var_exists(scope: ModuleType, var_name: str) -> None:
         'Не удаляйте и не переименовывайте ее.'
     )
     var = getattr(scope, var_name)
-    assert not callable(
-        var
-    ), f'`{var_name}` должна быть переменной, а не функцией.'
+    assert not callable(var), (
+        f'`{var_name}` должна быть переменной, а не функцией.'
+    )
 
 
 @contextmanager
@@ -98,7 +100,7 @@ class MockResponseGET:
             'current_date': self.random_timestamp,
         }
         self.data = default_data if data is None else data
-        logging.warning(MockResponseGET.CALLED_LOG_MSG)
+        logger.warning(MockResponseGET.CALLED_LOG_MSG)
 
     def json(self):
         return self.data
@@ -156,7 +158,7 @@ def with_timeout(f):
                     f()
             except TestTimeoutError:
                 pass
-        except BreakInfiniteLoopError:  # noqa: TRY302
+        except BreakInfiniteLoopError:  # noqa: TRY203
             # intercept higher up in the call hierarchy
             raise
         else:

@@ -8,6 +8,7 @@ Telegram-бот для проверки статуса домашней рабо
 - python-telegram-bot
 - python-dotenv
 - requests
+- uv
 
 ### Запуск бота
 1. Создать файл `.env` с переменными окружения:
@@ -15,15 +16,9 @@ Telegram-бот для проверки статуса домашней рабо
     - `TELEGRAM_TOKEN` - токен Telegram-бота
     - `TELEGRAM_CHAT_ID` - ID чата адресата оповещения
 
-2. Подготовить окружение:
+2. Подготовить окружение и запустить скрипт:
     ```bash
-    py -m 3.12 venv venv
-    source venv/Scripts/activate
-    pip install -r requirements.txt
-    ```
-3. Запустить скрипт:
-    ```bash
-    python homework.py
+    uv run homework.py
     ```
 
 ### Об авторе
